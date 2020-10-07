@@ -62,7 +62,7 @@ async function run() {
       return;
     }
     core.debug("Tags found:");
-    for (let tag of tags) {
+    for (let tag of await tags) {
       core.debug(`- ${tag}`);
     }
   } catch (error) {
