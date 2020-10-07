@@ -48,6 +48,7 @@ async function exec(command: string) {
 
 async function get_version_tags_for_DT(deployable_target: any) {
   let tags: string = '';[] = [];
+  await exec("git fetch --tags");
   // tags = (await exec(`git tag --list '${deployable_target}-v*'`)).stdout;//.split("\n");
   tags = (await exec(`git tag`)).stdout;//.split("\n");
   core.debug(`Tags found: ${tags}`);
