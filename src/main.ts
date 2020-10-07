@@ -44,10 +44,10 @@ async function exec(command: string) {
 async function get_version_tags_for_DT(deployable_target: any) {
   let tags: string = '';[] = [];
   tags = (await exec(`git tag --list '${deployable_target}-v*'`)).stdout;//.split("\n");
-  core.debug("Tags found:");
-  for (let tag of await tags) {
-    core.debug(`- ${tag}`);
-  }
+  core.debug(`Tags found: ${tags}`);
+  // for (let tag of await tags) {
+  //   core.debug(`- ${tag}`);
+  // }
   return tags
 }
 
