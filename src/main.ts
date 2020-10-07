@@ -13,7 +13,8 @@ async function exec(command: string) {
   let stderr = "";
 
   try {
-    const options = {
+   core.debug(`Executing command: ${command}`);
+   const options = {
       listeners: {
         stdout: (data: Buffer) => {
           stdout += data.toString();
@@ -32,19 +33,23 @@ async function exec(command: string) {
       stderr,
     };
   } catch (err) {
+    core.debug(`Caught error: ${err}`);
     return {
       code: 1,
       stdout,
       stderr,
       error: err,
     };
+  } finally {
+    core.debug(`Stdout: ${stdout}`);
+    core.debug(`Stderr: ${stderr}`);
   }
 }
 
 async function get_version_tags_for_DT(deployable_target: any) {
   let tags: string = '';[] = [];
   // tags = (await exec(`git tag --list '${deployable_target}-v*'`)).stdout;//.split("\n");
-  tags = (await exec(`git tag`)).error;//.split("\n");
+  tags = (await exec(`git tag`)).stdout;//.split("\n");
   core.debug(`Tags found: ${tags}`);
   // for (let tag of await tags) {
   //   core.debug(`- ${tag}`);
