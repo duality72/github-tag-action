@@ -1,6 +1,6 @@
 name: "GitHub Tag"
 description: "Bump and push git tag on merge"
-author: "Mathieu Dutour"
+author: "Chris Hilton"
 outputs:
   new_tag:
     description: "Generated tag"
@@ -8,39 +8,17 @@ outputs:
     description: "Generated tag without the prefix"
   previous_tag:
     description: "Previous tag (or `0.0.0`)"
-  changelog:
-    description: "The conventional changelog since the previous tag"
 inputs:
   github_token:
     description: "Required for permission to tag the repo."
     required: true
-  default_bump:
-    description: "Which type of bump to use when none explicitly provided (default: `patch`)."
-    required: false
-    default: "patch"
-  tag_prefix:
-    description: "A prefix to the tag name (default: `v`)."
-    required: false
-    default: "v"
-  custom_tag:
-    description: "Custom tag name. If specified, it overrides bump settings."
-    required: false
-  release_branches:
-    description: "Comma separated list of branches (bash reg exp accepted) that will generate the release tags. Other branches and pull-requests generate versions postfixed with the commit hash and do not generate any tag. Examples: `master` or `.*` or `release.*,hotfix.*,master`..."
-    required: false
-    default: "master"
-  create_annotated_tag:
-    description: "Boolean to create an annotated tag rather than lightweight"
-    required: false
-    default: false
-  dry_run:
-    description: "Do not perform taging, just calculate next version and changelog, then exit"
-    required: false
-    default: false
+  deployable_target:
+    description: "The deployable target to bump the version of"
+    required: true
 
 runs:
   using: "node12"
-  main: "lib/main.js"
+  main: "src/main.ts"
 branding:
   icon: "git-merge"
   color: "purple"
