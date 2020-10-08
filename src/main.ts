@@ -47,14 +47,18 @@ async function exec(command: string, args?: string[]) {
 }
 
 async function get_version_tags_for_DT(deployable_target: any) {
-  let tags: string = '';[] = [];
+  let tags: string[] = [];
   await exec("git fetch --tags");
   tags = (await exec('git', ['tag', '--list', `${deployable_target}-v*`])).stdout.split("\n");
   core.debug(`Tags found: ${tags}`);
-  for (let tag of await tags) {
-    core.debug(`- ${tag}`);
-  }
   return tags
+}
+
+async function get_highest_version_for_DT(deployable_target: string) {
+  let tags = await get_version_tags_for_DT(deployable_target);
+  let versions = new Set(tags.map(x => x.slice(deployable_target.length + '-v'.length)))
+  core.debug(`Versions found: ${versions}`);
+  return tags;
 }
 
 async function run() {
@@ -66,9 +70,9 @@ async function run() {
     }
 
     const deployable_target = core.getInput("deployable_target");
-    let tags = get_version_tags_for_DT(deployable_target);
-    if (!tags) {
-      core.setFailed(`No tags found for deployable target ${deployable_target}`);
+    let last_version = get_highest_version_for_DT(deployable_target);
+    if (!last_version) {
+      core.setFailed(`No last version found for deployable target ${deployable_target}`);
       return;
     }
   } catch (error) {
