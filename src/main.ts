@@ -1,12 +1,13 @@
 import * as core from "@actions/core";
 import { exec as _exec } from "@actions/exec";
 import { context, GitHub } from "@actions/github";
-import { inc, valid, ReleaseType } from "semver";
+import { gt, inc, valid, ReleaseType } from "semver";
 import { analyzeCommits } from "@semantic-release/commit-analyzer";
 import { generateNotes } from "@semantic-release/release-notes-generator";
 
 const HASH_SEPARATOR = "|commit-hash:";
 const SEPARATOR = "==============================================";
+const VERSION_PREFIX = '-v'
 
 async function exec(command: string, args?: string[]) {
   let stdout = "";
@@ -49,18 +50,24 @@ async function exec(command: string, args?: string[]) {
 async function get_version_tags_for_DT(deployable_target: any) {
   let tags: string[] = [];
   await exec("git fetch --tags");
-  tags = (await exec('git', ['tag', '--list', `${deployable_target}-v*`])).stdout.split("\n");
+  tags = (await exec('git', ['tag', '--list', `${deployable_target}${VERSION_PREFIX}*`])).stdout.split("\n");
   core.debug(`Tags found: ${tags}`);
   return tags
 }
 
 async function get_highest_version_for_DT(deployable_target: string) {
   let tags = await get_version_tags_for_DT(deployable_target);
-  let versions = tags.map(x => x.slice(deployable_target.length + '-v'.length));
+  let versions = tags.map(x => x.slice(deployable_target.length + VERSION_PREFIX.length));
   core.debug(`All versions found: ${versions}`);
-  let valid_versions = versions.filter(x => valid(x));
-  core.debug(`Valid versions found: ${valid_versions}`);
-  return tags;
+  let validVersions = versions.filter(x => valid(x));
+  core.debug(`Valid versions found: ${validVersions}`);
+  if (!validVersions) { return '0.0.0'; }
+  let highestVersion = validVersions.pop();
+  for (let version in versions) {
+    if (gt(version, highestVersion!)) { highestVersion = version; }
+  }
+  core.debug(`Highest version found: ${highestVersion}`);
+  return highestVersion;
 }
 
 async function run() {
@@ -71,15 +78,25 @@ async function run() {
       return;
     }
 
-    const deployable_target = core.getInput("deployable_target");
-    let last_version = get_highest_version_for_DT(deployable_target);
-    if (!last_version) {
-      core.setFailed(`No last version found for deployable target ${deployable_target}`);
+    const deployableTarget = core.getInput("deployable_target");
+    let lastVersion = await get_highest_version_for_DT(deployableTarget);
+    if (!lastVersion) {
+      core.setFailed(`No last version found for deployable target ${deployableTarget}`);
       return;
     }
+    core.setOutput("previous_version", lastVersion);
+
+    let newVersion = inc(lastVersion, "patch" as ReleaseType);
+    core.debug(`New version: ${newVersion}`);
+    core.setOutput("new_version", newVersion);
+
+    let newTag = `${deployableTarget}${VERSION_PREFIX}${newVersion}`;
+    core.debug(`New tag: ${newTag}`);
+    core.setOutput("new_tag", newTag);
   } catch (error) {
     core.setFailed(error.message);
   }
+
   //   const defaultBump = core.getInput("default_bump") as ReleaseType | "false";
   //   const tagPrefix = core.getInput("tag_prefix");
   //   const customTag = core.getInput("custom_tag")
