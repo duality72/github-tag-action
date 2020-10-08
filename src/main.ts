@@ -59,7 +59,7 @@ async function get_highest_version_for_DT(deployable_target: string) {
   let tags = await get_version_tags_for_DT(deployable_target);
   let versions = tags.map(x => x.slice(deployable_target.length + VERSION_PREFIX.length));
   core.debug(`All versions found: ${versions}`);
-  let validVersions = versions.filter(x => valid(x));
+  let validVersions = versions.filter(x => valid(x, true));
   core.debug(`Valid versions found: ${validVersions}`);
   if (!validVersions) { return '0.0.0'; }
   let highestVersion = validVersions.pop();
