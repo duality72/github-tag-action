@@ -57,7 +57,7 @@ async function get_version_tags_for_DT(deployable_target: any) {
 async function get_highest_version_for_DT(deployable_target: string) {
   let tags = await get_version_tags_for_DT(deployable_target);
   let versions = new Set(tags.map(x => x.slice(deployable_target.length + '-v'.length)))
-  core.debug(`Versions found: ${versions}`);
+  core.debug(`Versions found: ${Array.from(versions)}`);
   return tags;
 }
 
