@@ -64,6 +64,7 @@ async function get_highest_version_for_DT(deployable_target: string) {
   if (!validVersions) { return '0.0.0'; }
   let highestVersion = validVersions.pop();
   for (let version in versions) {
+    core.debug(`Comparing: ${version} ${highestVersion}`);
     if (gt(version, highestVersion!)) { highestVersion = version; }
   }
   core.debug(`Highest version found: ${highestVersion}`);
