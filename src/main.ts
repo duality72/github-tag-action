@@ -8,7 +8,7 @@ import { generateNotes } from "@semantic-release/release-notes-generator";
 const HASH_SEPARATOR = "|commit-hash:";
 const SEPARATOR = "==============================================";
 
-async function exec(command: string) {
+async function exec(command: string, args?: string[]) {
   let stdout = "";
   let stderr = "";
 
@@ -25,7 +25,7 @@ async function exec(command: string) {
       },
     };
 
-    const code = await _exec(command, undefined, options);
+    const code = await _exec(command, args, options);
 
     return {
       code,
@@ -50,7 +50,7 @@ async function get_version_tags_for_DT(deployable_target: any) {
   let tags: string = '';[] = [];
   await exec("git fetch --tags");
   // tags = (await exec(`git tag --list '${deployable_target}-v*'`)).stdout;//.split("\n");
-  tags = (await exec(`git tag --list \'${deployable_target}-v*\'`)).stdout;//.split("\n");
+  tags = (await exec('git', ['tag', '--list', '${deployable_target}-v*'])).stdout;//.split("\n");
   core.debug(`Tags found: ${tags}`);
   // for (let tag of await tags) {
   //   core.debug(`- ${tag}`);
