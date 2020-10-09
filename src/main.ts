@@ -120,6 +120,14 @@ async function run() {
       core.info("Dry run: not performing tag action.");
       return;
     }
+
+    const octokit = new GitHub(core.getInput("github_token"));
+    core.debug(`Pushing new tag to the repo`);
+    await octokit.git.createRef({
+      ...context.repo,
+      ref: `refs/tags/${newTag}`,
+      sha: GITHUB_SHA,
+    });
   } catch (error) {
     core.setFailed(error.message);
   }
