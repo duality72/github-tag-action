@@ -12,7 +12,7 @@ const DEFAULT_VERSION = '0.0.0';
 const RELEASE_TYPES = ['major', 'minor', 'patch']
 
 class AffirmVersion {
-  tag
+  tag: string
   version
 
   constructor(tag, version) {
@@ -104,7 +104,8 @@ async function run() {
     }
     core.setOutput("previous_version", lastVersion);
 
-    let bumpType = RELEASE_TYPES[(lastVersion.tag.match(/\./) || []).length]
+    let bumpType = RELEASE_TYPES[(lastVersion.tag.match(/\./) || []).length];
+    core.debug(`Bump type: ${bumpType}`);
     let newVersion = `${inc(lastVersion.version, bumpType as ReleaseType)}`;
     while (newVersion.endsWith('.0')) {
       newVersion = newVersion.slice(0, -2);
