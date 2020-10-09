@@ -103,7 +103,10 @@ async function run() {
     core.setOutput("previous_version", lastVersion);
 
     let bumpType = RELEASE_TYPES[(lastVersion.tag.match(/\./) || []).length]
-    let newVersion = inc(lastVersion.version, bumpType as ReleaseType);
+    let newVersion = `${inc(lastVersion.version, bumpType as ReleaseType)}`;
+    while (newVersion.endsWith('.0')) {
+      newVersion = newVersion.slice(0, -2);
+    }
     core.debug(`New version: ${newVersion}`);
     core.setOutput("new_version", newVersion);
 
