@@ -63,6 +63,8 @@ async function get_version_tags_for_DT(deployable_target: any) {
   let tags: string[] = [];
   await exec("git fetch --tags");
   tags = (await exec('git', ['tag', '--list', `${deployable_target}${VERSION_PREFIX}*`])).stdout.split("\n");
+  // Make sure version tag only ends with periods and digits
+  tags = tags.filter(x => x.match(/-v(\.\d)+$/));
   core.debug(`Tags found: ${tags}`);
   return tags;
 }
@@ -107,11 +109,9 @@ async function run() {
     while (newVersion.endsWith('.0')) {
       newVersion = newVersion.slice(0, -2);
     }
-    core.debug(`New version: ${newVersion}`);
     core.setOutput("new_version", newVersion);
 
     let newTag = `${deployableTarget}${VERSION_PREFIX}${newVersion}`;
-    core.debug(`New tag: ${newTag}`);
     core.setOutput("new_tag", newTag);
   } catch (error) {
     core.setFailed(error.message);
