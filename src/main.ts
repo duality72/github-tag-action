@@ -8,6 +8,18 @@ import { generateNotes } from "@semantic-release/release-notes-generator";
 const HASH_SEPARATOR = "|commit-hash:";
 const SEPARATOR = "==============================================";
 const VERSION_PREFIX = '-v'
+const DEFAULT_VERSION = '0.0.0';
+const RELEASE_TYPES = ['major', 'minor', 'patch']
+
+class AffirmVersion {
+  tag
+  version
+
+  constructor(tag, version) {
+    this.tag = tag;
+    this.version = version;
+  }
+}
 
 async function exec(command: string, args?: string[]) {
   let stdout = "";
@@ -52,23 +64,25 @@ async function get_version_tags_for_DT(deployable_target: any) {
   await exec("git fetch --tags");
   tags = (await exec('git', ['tag', '--list', `${deployable_target}${VERSION_PREFIX}*`])).stdout.split("\n");
   core.debug(`Tags found: ${tags}`);
-  return tags
+  return tags;
 }
 
 async function get_highest_version_for_DT(deployable_target: string) {
   let tags = await get_version_tags_for_DT(deployable_target);
   // Remove the DT+version prefix and coerce into a semantic version
-  let versions = tags.map(x => coerce(x.slice(deployable_target.length + VERSION_PREFIX.length)));
+  let versions = tags.map(x => new AffirmVersion(x, coerce(x.slice(deployable_target.length + VERSION_PREFIX.length))));
   core.debug(`All versions found: ${versions}`);
   let validVersions = versions.filter(x => valid(x));
   core.debug(`Valid versions found: ${validVersions}`);
-  if (!validVersions) { return '0.0.0'; }
+  if (!validVersions) {
+    return new AffirmVersion(`${deployable_target}${VERSION_PREFIX}${DEFAULT_VERSION}`, coerce(DEFAULT_VERSION));
+  }
   let highestVersion = validVersions.pop();
   for (let version of validVersions) {
     core.debug(`Comparing: ${version} ${highestVersion}`);
-    if (gt(version!, highestVersion!)) { highestVersion = version; }
+    if (gt(version.version, highestVersion!.version)) { highestVersion = version; }
   }
-  core.debug(`Highest version found: ${highestVersion}`);
+  core.debug(`Highest version found: ${highestVersion!.version}`);
   return highestVersion;
 }
 
@@ -88,7 +102,8 @@ async function run() {
     }
     core.setOutput("previous_version", lastVersion);
 
-    let newVersion = inc(lastVersion, "patch" as ReleaseType);
+    let bumpType = RELEASE_TYPES[(lastVersion.tag.match(/\./) || []).length]
+    let newVersion = inc(lastVersion.version, bumpType as ReleaseType);
     core.debug(`New version: ${newVersion}`);
     core.setOutput("new_version", newVersion);
 
