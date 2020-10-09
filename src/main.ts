@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import { exec as _exec } from "@actions/exec";
 import { context, GitHub } from "@actions/github";
-import { gt, inc, valid, ReleaseType } from "semver";
+import { coerce, gt, inc, valid, ReleaseType } from "semver";
 import { analyzeCommits } from "@semantic-release/commit-analyzer";
 import { generateNotes } from "@semantic-release/release-notes-generator";
 
@@ -59,7 +59,7 @@ async function get_highest_version_for_DT(deployable_target: string) {
   let tags = await get_version_tags_for_DT(deployable_target);
   let versions = tags.map(x => x.slice(deployable_target.length + VERSION_PREFIX.length));
   core.debug(`All versions found: ${versions}`);
-  let validVersions = versions.filter(x => valid(x, true));
+  let validVersions = versions.filter(x => valid(coerce(x)));
   core.debug(`Valid versions found: ${validVersions}`);
   if (!validVersions) { return '0.0.0'; }
   let highestVersion = validVersions.pop();
