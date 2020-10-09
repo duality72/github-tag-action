@@ -71,18 +71,18 @@ async function get_highest_version_for_DT(deployable_target: string) {
   let tags = await get_version_tags_for_DT(deployable_target);
   // Remove the DT+version prefix and coerce into a semantic version
   let versions = tags.map(x => new AffirmVersion(x, coerce(x.slice(deployable_target.length + VERSION_PREFIX.length))));
-  core.debug(`All versions found: ${versions}`);
-  let validVersions = versions.filter(x => valid(x));
-  core.debug(`Valid versions found: ${validVersions}`);
+  core.debug(`All versions found: ${versions.map(x => x.version)}`);
+  let validVersions = versions.filter(x => valid(x.version));
+  core.debug(`Valid versions found: ${validVersions.map(x => x.version)}`);
   if (!validVersions) {
     return new AffirmVersion(`${deployable_target}${VERSION_PREFIX}${DEFAULT_VERSION}`, coerce(DEFAULT_VERSION));
   }
-  let highestVersion = validVersions.pop();
+  let highestVersion = validVersions.pop()!;
   for (let version of validVersions) {
-    core.debug(`Comparing: ${version} ${highestVersion}`);
-    if (gt(version.version, highestVersion!.version)) { highestVersion = version; }
+    core.debug(`Comparing: ${version.version} ${highestVersion.version}`);
+    if (gt(version.version, highestVersion.version)) { highestVersion = version; }
   }
-  core.debug(`Highest version found: ${highestVersion!.version}`);
+  core.debug(`Highest version found: ${highestVersion.version}`);
   return highestVersion;
 }
 
