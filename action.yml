@@ -15,6 +15,10 @@ inputs:
   deployable_target:
     description: "The deployable target to bump the version of"
     required: true
+  dry_run:
+    description: "Do not perform tagging, just calculate next version, then exit"
+    required: false
+    default: false
 
 runs:
   using: "node12"

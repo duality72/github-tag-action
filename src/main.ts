@@ -114,6 +114,12 @@ async function run() {
 
     let newTag = `${deployableTarget}${VERSION_PREFIX}${newVersion}`;
     core.setOutput("new_tag", newTag);
+
+    const dryRun = core.getInput("dry_run");
+    if (/true/i.test(dryRun)) {
+      core.info("Dry run: not performing tag action.");
+      return;
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
@@ -240,10 +246,6 @@ async function run() {
   //     return;
   //   }
   //
-  //   if (/true/i.test(dryRun)) {
-  //     core.info("Dry run: not performing tag action.");
-  //     return;
-  //   }
   //
   //   const octokit = new GitHub(core.getInput("github_token"));
   //
