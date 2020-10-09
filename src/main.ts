@@ -64,7 +64,7 @@ async function get_version_tags_for_DT(deployable_target: any) {
   await exec("git fetch --tags");
   tags = (await exec('git', ['tag', '--list', `${deployable_target}${VERSION_PREFIX}*`])).stdout.split("\n");
   // Make sure version tag only ends with periods and digits
-  tags = tags.filter(x => x.match(/-v(\.\d)+$/));
+  tags = tags.filter(x => x.match(/-v[\.\d]+$/));
   core.debug(`Tags found: ${tags}`);
   return tags;
 }
