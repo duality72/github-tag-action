@@ -1,6 +1,6 @@
 # GitHub Tag Action
 
-A GitHub Action to automatically bump and tag master, on merge, with the latest SemVer formatted version. Works on any platform.
+A GitHub Action to automatically bump and tag master, on merge, with a new version. This action is based on mathieudutour/github-tag-action, but has been heavily modified for Affirm-specific use. The documentation has been updated, but some elements of the old documentation may have been missed. 
 
 ## Usage
 
@@ -14,53 +14,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-        with:
-          # Fetches entire history, so we can analyze commits since last tag
-          fetch-depth: 0
+      - uses: Affirm/actions/external/checkout@master
       - name: Bump version and push tag
-        uses: mathieudutour/github-tag-action@v4.5
+        uses: Affirm/actions/github-tag-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          deployable_target: ${{ github.event.inputs.dt_name }}
 ```
 
 ### Inputs
 
 - **github_token** _(required)_ - Required for permission to tag the repo. Usually `${{ secrets.GITHUB_TOKEN }}`.
-- **default_bump** _(optional)_ - Which type of bump to use when [none is explicitly provided](#bumping) (default: `patch`). You can also set `false` to avoid generating a new tag when none is explicitly provided.
-- **tag_prefix** _(optional)_ - A prefix to the tag name (default: `v`).
-- **custom_tag** _(optional)_ - Custom tag name. If specified, it overrides bump settings. 
-- **release_branches** _(optional)_ - Comma separated list of branches (bash reg exp accepted) that will generate the release tags. Other branches and pull-requests generate versions postfixed with the commit hash and do not generate any tag. Examples: `master` or `.*` or `release.*,hotfix.*,master`... (default: `master`).
-- **create_annotated_tag** _(optional)_ - Boolean to create an annotated rather than a lightweight one (default: `false`).
-- **dry_run** _(optional)_ - Do not perform taging, just calculate next version and changelog, then exit
+- **deployable_target** _(required)_ - Required to determine which DT version to bump.
+- **dry_run** _(optional)_ - Do not perform taging, just calculate next version, then exit
 
 ### Outputs
 
-- **new_tag** - The value of the newly created tag. Note that if there hasn't been any new commit, this will be `undefined`.
-- **new_version** - The value of the newly created tag without the prefix. Note that if there hasn't been any new commit, this will be `undefined`.
-- **previous_tag** - The value of the previous tag (or `0.0.0` if none).
-- **changelog** - The [conventional changelog](https://github.com/conventional-changelog/conventional-changelog) since the previous tag.
+- **new_tag** - The value of the newly created tag.
+- **new_version** - The value of the newly created tag without the prefix.
+- **previous_tag** - The value of the previous tag (or `<DT>-v0.0.0` if none).
 
 > **_Note:_** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference) by default.
 
-### Bumping
-
-The action will parse the new commits since the last tag using the [semantic-release](https://github.com/semantic-release/semantic-release) conventions.
-
-semantic-release uses the commit messages to determine the type of changes in the codebase. Following formalized conventions for commit messages, semantic-release automatically determines the next [semantic version](https://semver.org) number.
-
-By default semantic-release uses [Angular Commit Message Conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).
-
-Here is an example of the release type that will be done based on a commit messages:
-
-| Commit message                                                                                                                                                                                   | Release type  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| `fix(pencil): stop graphite breaking when too much pressure applied`                                                                                                                             | Patch Release |
-| `feat(pencil): add 'graphiteWidth' option`                                                                                                                                                       | Minor Release |
-| `perf(pencil): remove graphiteWidth option`<br><br>`BREAKING CHANGE: The graphiteWidth option has been removed.`<br>`The default graphite width of 10mm is always used for performance reasons.` | Major Release |
-
-If no commit message contains any information, then **default_bump** will be used.
-
 ## Credits
 
-[anothrNick/github-tag-action](https://github.com/anothrNick/github-tag-action) - a similar action using a Dockerfile (hence not working on macOS)
+[mathieudutour/github-tag-action](https://github.com/mathieudutour/github-tag-action) - a similar action that this action is based on
